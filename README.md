@@ -44,7 +44,7 @@ retourne la couverture la plus proche pour chaque opérateur si elle est diponib
 
 L'API a été développée en python 3.8.1.
 
-J'ai utlisé les frameworks suivant : 
+J'ai utilisé les frameworks suivant : 
   - flask 
   - flask-sqlalchemy
   - pandas 
