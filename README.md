@@ -47,7 +47,7 @@ L'API a été développée en python 3.8.1.
 J'ai utlisé les frameworks suivant : 
   - flask 
   - flask-sqlalchemy
-  - pandas = "*"
+  - pandas 
   - flask-marshmallow
   - pyproj 
   - marshmallow-sqlalchemy
