@@ -33,12 +33,12 @@ et sa réponse :
     }
 }
 
-J'ai utilisé modifié le fichier csv initial contenant les différentes couvertures réseaux. 
+J'ai utilisé modifié le fichier csv initial contenant les différentes couvertures réseaux (dbModification.py). 
 J'ai converti les coordonnées Lambert93 en coordonnées GPS et renseigné la ville rattachée à l'aide des api :
   - https://api-adresse.data.gouv.fr
   - http://open.mapquestapi.com 
   
-J'ai ensuite créé un base sqlite utilisée par l'API. La base créée contenant plusieurs coordonnées par ville (et des villes homonymes), 
+J'ai ensuite créé un base sqlite utilisée par l'API (createDB.py). La base créée contenant plusieurs coordonnées par ville (et des villes homonymes), 
 lors d'une requêtes, la distance entre les coordonnées de l'adresse et de celles de la base données ayant la même ville est calculé, puis l'API 
 retourne la couverture la plus proche pour chaque opérateur si elle est diponible.
 
