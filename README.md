@@ -52,3 +52,6 @@ J'ai utlisé les frameworks suivant :
   - pyproj 
   - marshmallow-sqlalchemy
 
+# Run Server (http://localhst:8080)
+python app.py
+
