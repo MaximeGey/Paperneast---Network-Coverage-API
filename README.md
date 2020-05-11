@@ -42,7 +42,7 @@ J'ai converti les coordonnées Lambert93 en coordonnées GPS et renseigné la vi
   
 J'ai ensuite créé un base sqlite utilisée par l'API (createDB.py). La base créée contenant plusieurs coordonnées par ville (et des villes homonymes), 
 lors d'une requête, la distance entre les coordonnées de l'adresse et de celles de la base données ayant la même ville est calculé, puis l'API 
-retourne la couverture la plus proche pour chaque opérateur si elle est disponible.
+retourne les informations de couvertures la plus proche pour chaque opérateur si elle est disponible.
 
 L'API a été développée en python 3.8.1.
 
