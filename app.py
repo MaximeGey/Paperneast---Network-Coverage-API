@@ -78,14 +78,17 @@ def hello():
 @app.route("/get/q=<int:nb_street>+<road_name>+<int:postal_code>+<city_name>", methods=['GET'])
 def GET(nb_street, road_name, postal_code, city_name):
 
-    #response initialisation
+    # the fisrt caracter of the city name needs to be a capital letter
+    city_first = str.upper(city_name[0])
+    city = city_first+city_name[1:]
 
+    #response initialisation
     reponse = NetworkInformation()
 
     adresse = {'nb':nb_street,
                'street': road_name,
                'ZIP': postal_code,
-               'city': city_name}
+               'city': city}
     
     # getting GPS coordonates of the adress
 
@@ -95,7 +98,7 @@ def GET(nb_street, road_name, postal_code, city_name):
 
     # getting coverage network data of the city
 
-    ncs = NetworkCoverage.query.filter(NetworkCoverage.city == city_name)
+    ncs = NetworkCoverage.query.filter(NetworkCoverage.city == city)
 
     # running through the different coverage network datas of the city
 
@@ -120,19 +123,21 @@ def GET(nb_street, road_name, postal_code, city_name):
             x = (row.lon - info['geometry']['coordinates'][0])*math.cos((row.lat+info['geometry']['coordinates'][0])/2)
             y = row.lon-info['geometry']['coordinates'][0]
             z = math.sqrt(x*x+y*y)
-            reponse.setDistance(ope, 1.852*60*z)
-            reponse.setInfo(inf)
-            reponse.addInfo(row.op)
+            d = 1.852*60*z # km conversion
+            if d < 50 :  # if two different cities have the same name
+                reponse.setDistance(ope, d)
+                reponse.setInfo(inf)
+                reponse.addInfo(row.op)
         else :
             x = (row.lon - info['geometry']['coordinates'][0])*math.cos((row.lat+info['geometry']['coordinates'][0])/2)
             y = row.lon-info['geometry']['coordinates'][0]
             z = math.sqrt(x*x+y*y)
-            d = 1.852*60*z
-
-            if d < reponse.getDistance()[ope] :
-                reponse.setDistance(ope, d)
-                reponse.setInfo(inf)
-                reponse.addInfo(row.op)       
+            d = 1.852*60*z  # km conversion
+            if d < 50 :  # if two different cities have the same name
+                if d < reponse.getDistance()[ope] :
+                    reponse.setDistance(ope, d)
+                    reponse.setInfo(inf)
+                    reponse.addInfo(row.op)      
 
     # returning the info sought
 
