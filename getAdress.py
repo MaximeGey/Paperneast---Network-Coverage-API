@@ -9,8 +9,6 @@ import requests
 api_token = ''
 api_url_base = 'https://api-adresse.data.gouv.fr/search/?q='
 
-#https://api-adresse.data.gouv.fr/search/?q=lat=48.789&lon=2.789
-
 headers = {'Content-Type': 'application/json',
           'Authorization': 'Bearer {0}'.format(api_token)}
 

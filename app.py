@@ -10,11 +10,13 @@ import json, os
 import pandas as pd
 import math
 
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
 from getAdress import getInfo
 from networkInformation import NetworkInformation
+
 
 # data = pd.read_csv("db_operator.csv", sep=',') # Coverage network data 
 
@@ -78,70 +80,75 @@ def hello():
 @app.route("/get/q=<int:nb_street>+<road_name>+<int:postal_code>+<city_name>", methods=['GET'])
 def GET(nb_street, road_name, postal_code, city_name):
 
-    # the fisrt caracter of the city name needs to be a capital letter
-    city_first = str.upper(city_name[0])
-    city = city_first+city_name[1:]
+    try :
+        # the fisrt caracter of the city name needs to be a capital letter
+        city_first = str.upper(city_name[0])
+        city = city_first+city_name[1:]
 
-    #response initialisation
-    reponse = NetworkInformation()
+        #response initialisation
+        reponse = NetworkInformation()
 
-    adresse = {'nb':nb_street,
-               'street': road_name,
-               'ZIP': postal_code,
-               'city': city}
-    
-    # getting GPS coordonates of the adress
+        adresse = {'nb':nb_street,
+                'street': road_name,
+                'ZIP': postal_code,
+                'city': city}
+        
+        # getting GPS coordonates of the adress
 
-    info = getInfo(adresse)
+        info = getInfo(adresse)
 
-    reponse.setCor([info['geometry']['coordinates'][0],info['geometry']['coordinates'][1]])
+        reponse.setCor([info['geometry']['coordinates'][0],info['geometry']['coordinates'][1]])
 
-    # getting coverage network data of the city
+        # getting coverage network data of the city
 
-    ncs = NetworkCoverage.query.filter(NetworkCoverage.city == city)
+        ncs = NetworkCoverage.query.filter(NetworkCoverage.city == city)
 
-    # running through the different coverage network datas of the city
+        # running through the different coverage network datas of the city
 
-    for row in ncs:
+        for row in ncs:
 
-        if row.op == 20801 :
-            ope = "ORANGE"
-        elif row.op == 20810 :
-            ope = "SFR"
-        elif row.op == 20815 :
-            ope = "FREE"
-        else :
-            ope = "BOUYGUE"
+            if row.op == 20801 :
+                ope = "ORANGE"
+            elif row.op == 20810 :
+                ope = "SFR"
+            elif row.op == 20815 :
+                ope = "FREE"
+            else :
+                ope = "BOUYGUE"
 
-        inf = {'2G':row._2G, '3G':row._4G, '4G':row._3G}
+            inf = {'2G':row._2G, '3G':row._4G, '4G':row._3G}
 
 
-        # getting the closest data of coverage network by calculating the distance between the adress indicated and the coordonates of the data
+            # getting the closest data of coverage network by calculating the distance between the adress indicated and the coordonates of the data
 
-        if reponse.getDistance()[ope] == None :
+            if reponse.getDistance()[ope] == None :
 
-            x = (row.lon - info['geometry']['coordinates'][0])*math.cos((row.lat+info['geometry']['coordinates'][0])/2)
-            y = row.lon-info['geometry']['coordinates'][0]
-            z = math.sqrt(x*x+y*y)
-            d = 1.852*60*z # km conversion
-            if d < 50 :  # if two different cities have the same name
-                reponse.setDistance(ope, d)
-                reponse.setInfo(inf)
-                reponse.addInfo(row.op)
-        else :
-            x = (row.lon - info['geometry']['coordinates'][0])*math.cos((row.lat+info['geometry']['coordinates'][0])/2)
-            y = row.lon-info['geometry']['coordinates'][0]
-            z = math.sqrt(x*x+y*y)
-            d = 1.852*60*z  # km conversion
-            if d < 50 :  # if two different cities have the same name
-                if d < reponse.getDistance()[ope] :
+                x = (row.lon - info['geometry']['coordinates'][0])*math.cos((row.lat+info['geometry']['coordinates'][0])/2)
+                y = row.lon-info['geometry']['coordinates'][0]
+                z = math.sqrt(x*x+y*y)
+                d = 1.852*60*z # km conversion
+                if d < 50 :  # if two different cities have the same name
                     reponse.setDistance(ope, d)
                     reponse.setInfo(inf)
-                    reponse.addInfo(row.op)      
+                    reponse.addInfo(row.op)
+            else :
+                x = (row.lon - info['geometry']['coordinates'][0])*math.cos((row.lat+info['geometry']['coordinates'][0])/2)
+                y = row.lon-info['geometry']['coordinates'][0]
+                z = math.sqrt(x*x+y*y)
+                d = 1.852*60*z  # km conversion
+                if d < 50 :  # if two different cities have the same name
+                    if d < reponse.getDistance()[ope] :
+                        reponse.setDistance(ope, d)
+                        reponse.setInfo(inf)
+                        reponse.addInfo(row.op)      
 
-    # returning the info sought
+        # returning the info sought
 
-    return jsonify(reponse.getDict())
+        return jsonify(reponse.getDict())
+
+    except Exception as e :
+        return "The adress doesn't exist, please check the city name or the city code"
+
 
 
 # test of the sqlite db
